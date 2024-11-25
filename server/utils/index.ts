@@ -33,23 +33,34 @@ export function initSocket(event: H3Event) {
         users: getRoomUsers(user.room),
       });
     });
-    // Disconnect
-    socket.on("disconnect", () => {
-      const user = userLeave(socket.id);
-      if (user) {
-        socket.broadcast
-          .to(user.room)
-          .emit(
-            "message",
-            formatMessage(botName, `${user.username} has left the chat`)
-          );
 
-        io.to(user.room).emit("roomUsers", {
-          room: user.room,
-          users: getRoomUsers(user.room),
-        });
-      }
-    });
+    socket
+      .on("chatMessage", (payload: string) => {
+        const user = getCurrentUser(socket.id);
+        if (user) {
+          io.to(user.room).emit(
+            "message",
+            formatMessage(user.username, payload)
+          );
+        }
+      })
+      // Disconnect
+      .socket.on("disconnect", () => {
+        const user = userLeave(socket.id);
+        if (user) {
+          socket.broadcast
+            .to(user.room)
+            .emit(
+              "message",
+              formatMessage(botName, `${user.username} has left the chat`)
+            );
+
+          io.to(user.room).emit("roomUsers", {
+            room: user.room,
+            users: getRoomUsers(user.room),
+          });
+        }
+      });
   });
 }
 
