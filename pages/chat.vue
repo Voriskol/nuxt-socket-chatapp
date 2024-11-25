@@ -120,6 +120,7 @@
 </template>
 
 <script setup lang="ts">
+import { io, type Socket } from "socket.io-client";
 const route = useRoute();
 
 interface Chat {
@@ -128,32 +129,12 @@ interface Chat {
   time: string;
   room?: string;
 }
-type User = {
-  id: string;
-  username: string;
-  room: string;
-};
+
 const message = ref("");
-const chats = ref<Chat[]>([
-  {
-    username: "Gomik",
-    text: "Fuck off nigga",
-    time: "2:28 PM",
-    room: "about important",
-  },
-]);
-const users = ref<User[]>([
-  {
-    id: "0",
-    username: "Gomik",
-    room: "about important",
-  },
-  {
-    id: "1",
-    username: "Pedik",
-    room: "about important",
-  },
-]);
+const chats = ref<Chat[]>([]);
+const users = ref<User[]>([]);
+
+const socket = ref<Socket>();
 const currentRoom = ref("");
 const sendMessage = async () => {};
 onMounted(() => {
@@ -161,6 +142,23 @@ onMounted(() => {
   if (!username || !room) {
     navigateTo("/");
   }
+  socket.value = io({
+    path: "/api/socket.io",
+  });
+
+  socket.value.emit("joinRoom", { username, room });
+  socket.value.on("message", (response: Chat) => {
+    chats.value.push(response);
+  });
+
+  socket.value.on("roomUsers", (response: { room: string; users: User[] }) => {
+    currentRoom.value = response.room;
+    users.value = response.users;
+  });
+});
+onBeforeUnmount(() => {
+  console.log("Disconnect Block");
+  socket.value?.disconnect();
 });
 </script>
 
