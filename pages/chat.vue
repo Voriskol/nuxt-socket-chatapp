@@ -73,15 +73,15 @@
           }"
         >
           <div
-            class="px-6 py-2 w-1/2 rounded-md mb-3"
+            class="px-6 py-2 w-1/2 rounded-md mb-3 border-2"
             :class="{
               'bg-red-100': chat.username === 'NuxtChatapp Admin',
               'bg-primary/20': chat.username === route.query.username,
-              'bg-green-300': chat.username !== route.query.username,
+              'bg-gray-100': chat.username !== route.query.username,
             }"
           >
             <div class="flex items-center gap-x-3">
-              <div class="text-xs text-primary font-semibold">
+              <div class="text-xs text-primary font-semibold color">
                 {{ chat.username }}
               </div>
               <div class="text-xs">{{ chat.time }}</div>
